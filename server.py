@@ -166,12 +166,19 @@ def index():
 def another():
   return render_template("another.html")
 
+# @app.route('/coach')
+# def coach()
+  
+# print coach
+
+#   return render_template('coach.html')
+
 
 # Example of adding new data to the database
 @app.route('/add', methods=['POST'])
 def add():
   name = request.form['name']
-  g.conn.execute('INSERT INTO test VALUES (NULL, ?)', name)
+  g.conn.execute('INSERT INTO test (name) VALUES (%s)', name)
   return redirect('/')
 
 
