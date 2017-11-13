@@ -1,0 +1,36 @@
+<html>
+
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+  <body>
+    <h1>team</h1>
+    <div>{{data}}</div>
+
+    <div>
+    {% for n in data %}
+    <div>{{n}}</div>
+    {% endfor %}
+    </div>
+
+    <form method="POST" action="/add">
+        <p>
+
+          team_id: <input type="text" name="team_id" maxlength="5"> <br>
+          name: <input type="text" name="name" maxlength="80"> <br>
+          city: <input type="text" name="city" maxlength="80"> <br>
+          coach_id: <input type="text" name="coach_id" maxlength="5"> <br>
+          court_id: <input type="text" name="court_id" maxlength="5"> <br>
+          wins: <input type="number" name="wins"> <br>
+          losses: <input type="number" name="losses"> <br>
+
+        <input type="submit" value="Add"></p>
+    </form>
+
+  </body>
+
+</html>

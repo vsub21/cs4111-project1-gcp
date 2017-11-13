@@ -1,0 +1,37 @@
+<html>
+
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+  <body>
+    <h1>game</h1>
+    <div>{{data}}</div>
+
+    <div>
+    {% for n in data %}
+    <div>{{n}}</div>
+    {% endfor %}
+    </div>
+
+    <form method="POST" action="/add">
+        <p>
+
+          game_id: <input type="text" name="game_id" maxlength="5"> <br>
+          start_date: <input type="date" class="form-control" name="start_date" placeholder="MM/DD/YYYY"/> <br>
+          home_id: <input type="text" name="home_id" maxlength="5"> <br>
+          away_id: <input type="text" name="away_id" maxlength="5"> <br>
+          home_score: <input type="number" name="home_score"> <br>
+          away_score: <input type="number" name="away_score"> <br>
+          ref_id: <input type="text" name="ref_id" maxlength="5"> <br>
+          is_winner_home: <input type="radio" name="is_winner_home" value="0">Away Team Wins  <input type="radio" name="is_winner_home" value="1">Home Team Wins<br>
+
+        <input type="submit" value="Add"></p>
+    </form>
+
+  </body>
+
+</html>

@@ -1,0 +1,33 @@
+<html>
+
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+  <body>
+    <h1>court</h1>
+    <div>{{data}}</div>
+
+    <div>
+    {% for n in data %}
+    <div>{{n}}</div>
+    {% endfor %}
+    </div>
+
+    <form method="POST" action="/add">
+        <p>
+
+          court_id: <input type="text" name="court_id" maxlength="5"> <br>
+          city: <input type="text" name="city" maxlength="80"> <br>
+          state: <input type="text" name="state" maxlength="80"> <br>
+          zipcode: <input type="number" name="zipcode"> <br>
+
+        <input type="submit" value="Add"></p>
+    </form>
+
+  </body>
+
+</html>

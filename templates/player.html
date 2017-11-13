@@ -1,0 +1,42 @@
+<html>
+
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+  <body>
+    <h1>player</h1>
+    <div>{{data}}</div>
+
+    <div>
+    {% for n in data %}
+    <div>{{n}}</div>
+    {% endfor %}
+    </div>
+
+    <form method="POST" action="/add">
+        <p>
+
+          player_id: <input type="text" name="coach_id" maxlength="5"> <br>
+          fname: <input type="text" name="fname" maxlength="80"> <br>
+          lname: <input type="text" name="lname" maxlength="80"> <br>
+          dob: <input type="date" class="form-control" name="dob" placeholder="MM/DD/YYYY"/> <br>
+          height: <input type="number" name="height"> <br>
+          weight: <input type="number" name="weight"> <br>
+          is_rhd: <input type="radio" name="is_rhd" value="0">Left  <input type="radio" name="sex" value="1">Right<br>
+          is_injured: <input type="radio" name="is_injured" value="0">Not Injured <input type="radio" name="is_injured" value="1">Injured<br>
+          hometown: <input type="text" name="hometown" maxlength="80"> <br>
+          college: <input type="text" name="college" maxlength="80"> <br>
+          jersey_number: <input type="number" name="jersey_number"> <br>
+          team_id: <input type="text" name="team_id" maxlength = "5"> <br>
+          is_signed: <input type="radio" name="is_signed" value="0">Not Signed  <input type="radio" name="is_signed" value="1">Signed<br>
+
+        <input type="submit" value="Add"></p>
+    </form>
+
+  </body>
+
+</html>

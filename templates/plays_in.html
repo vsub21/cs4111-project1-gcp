@@ -1,0 +1,42 @@
+<html>
+
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+  <body>
+    <h1>plays_in</h1>
+    <div>{{data}}</div>
+
+    <div>
+    {% for n in data %}
+    <div>{{n}}</div>
+    {% endfor %}
+    </div>
+
+    <form method="POST" action="/add">
+        <p>
+
+          player_id: <input type="text" name="coach_id" maxlength="5"> <br>
+          game_id: <input type="text" name="game_id" maxlength="5"> <br>
+
+          fg: <input type="number" name="fg"> <br>
+          fga: <input type="number" name="fga"> <br>
+          tp: <input type="number" name="tp"> <br>
+          tpa: <input type="number" name="tpa"> <br>
+          pts: <input type="number" name="pts"> <br>
+          ast: <input type="number" name="ast"> <br>
+          stl: <input type="number" name="stl"> <br>
+          blk: <input type="number" name="blk"> <br>
+          tov: <input type="number" name="tov"> <br>
+          pf: <input type="number" name="pf"> <br>
+
+        <input type="submit" value="Add"></p>
+    </form>
+
+  </body>
+
+</html>
