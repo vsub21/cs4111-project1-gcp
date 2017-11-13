@@ -12,7 +12,7 @@
 
     {% if isDBA %}
     <div>
-      <span style="float:right"><a href="signin">Sign Out</a></span><br/>
+      <span style="float:right"><a href="signout">Sign Out</a></span><br/>
     </div>
     {% endif %}
 
@@ -33,10 +33,21 @@
     </form>
     {% endif %}
 
+    {% if isDBA %}
+    <h1 style='color: red'>DBA Debug: table game</h1>
     <br>
     <div>
-      {{ table|safe }}
+      {{ table_dba|safe }}
     </div>
+    <p>
+    {% endif %}
+
+    <br>
+    <div>
+    <h5> List of Games: </h5>
+      {{ table_user|safe }}
+    </div>
+    <p>
 
   </body>
 

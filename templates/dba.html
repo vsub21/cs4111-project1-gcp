@@ -12,21 +12,31 @@
 
     {% if isDBA %}
     <div>
-      <span style="float:right"><a href="signin">Sign Out</a></span><br/>
+      <span style="float:right"><a href="signout">Sign Out</a></span><br/>
     </div>
     {% endif %}
     
-    <form method="POST" action="/add">
+    <form method="POST" action="/dba">
         <p>
 
           dba_id: <input type="text" name="dba_id" maxlength="5"> <br>
           fname: <input type="text" name="fname" maxlength="80"> <br>
           lname: <input type="text" name="lname" maxlength="80"> <br>
+          email: <input type="text" name="email" maxlength="80"> <br>
           dob: <input type="date" class="form-control" name="dob" placeholder="MM/DD/YYYY"/> <br>
-          Sex: <input type="radio" name="sex" value="0">Male<br>  <input type="radio" name="sex" value="1">Female<br>
+          sex: <input type="radio" name="sex" value="0">Male<br>  <input type="radio" name="sex" value="1">Female<br>
 
         <input type="submit" value="Add"></p>
     </form>
+
+    {% if isDBA %}
+    <h1 style='color: red'>DBA Debug: table dba</h1>
+    <br>
+    <div>
+      {{ table|safe }}
+    </div>
+    <p>
+    {% endif %}
 
   </body>
 
