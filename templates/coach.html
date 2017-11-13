@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+
+<html>
+  <style>
+    body{ 
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+  <body>
+    <h1>Add a Coach</h1>
+
+      <form method="POST" action="/coach">
+        id: <input type="text" name="coach_id" maxlength="5"> <br>
+        First Name: <input type="text" name="fname" maxlength="80"> <br>
+        Last Name: <input type="text" name="lname" maxlength="80"> <br>
+        Sex: <input type="radio" name="sex" value="0">Male<br>  <input type="radio" name="sex" value="1">Female<br>
+        Date of Birth: <input type="date" class="form-control" name="dob" placeholder="MM/DD/YYYY"/> <br>
+        Number of Wins: <input type="number" name="c_wins"> <br>
+        Number of Losses: <input type="number" name="c_losses"> <br>
+        <input type="submit" value="Add">
+      </form>
+    <br>
+    <div>
+      {{ table|safe }}
+    </div>
+    <p>
+
+
+  </body>
+
+</html>
