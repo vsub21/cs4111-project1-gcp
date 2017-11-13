@@ -13,6 +13,12 @@
     <h1>Coaches</h1>
 
     {% if isDBA %}
+    <div>
+      <span style="float:right"><a href="signin.html">Sign Out</a></span><br/>
+    </div>
+    {% endif %}
+
+    {% if isDBA %}
 
       <form method="POST" action="/coach">
         id: <input type="text" name="coach_id" maxlength="5"> <br>

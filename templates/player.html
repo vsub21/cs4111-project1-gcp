@@ -9,13 +9,12 @@
 
   <body>
     <h1>Players</h1>
-    <div>{{data}}</div>
 
+    {% if isDBA %}
     <div>
-    {% for n in data %}
-    <div>{{n}}</div>
-    {% endfor %}
+      <span style="float:right"><a href="signin.html">Sign Out</a></span><br/>
     </div>
+    {% endif %}
 
     {% if isDBA %}
     <form method="POST" action="/add">
@@ -38,6 +37,11 @@
         <input type="submit" value="Add"></p>
     </form>
     {% endif %}
+
+    <br>
+    <div>
+      {{ table|safe }}
+    </div>
 
   </body>
 
