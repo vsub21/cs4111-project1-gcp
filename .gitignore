@@ -103,4 +103,7 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# Custom shit
+.DS_Store
+
 # End of https://www.gitignore.io/api/python
