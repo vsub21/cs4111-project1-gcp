@@ -8,7 +8,7 @@
   </style>
 
   <body>
-    <h1>court</h1>
+    <h1>Courts</h1>
     <div>{{data}}</div>
 
     <div>
@@ -17,16 +17,16 @@
     {% endfor %}
     </div>
 
+    {% if isDBA %}
     <form method="POST" action="/add">
         <p>
-
           court_id: <input type="text" name="court_id" maxlength="5"> <br>
           city: <input type="text" name="city" maxlength="80"> <br>
           state: <input type="text" name="state" maxlength="80"> <br>
           zipcode: <input type="number" name="zipcode"> <br>
-
         <input type="submit" value="Add"></p>
     </form>
+    {% endif %}
 
   </body>
 

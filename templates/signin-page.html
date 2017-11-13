@@ -1,0 +1,32 @@
+<html>
+
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+  <body>
+
+    <h1>Manage and View</h1>
+
+    <div>
+      <span style="float:right"><a href="home.html">Sign Out</a></span><br/>
+    </div>
+
+    <a href="coach.html">Coaches</a><br>
+    <a href="court.html">Courts</a><br>
+    <a href="game.html">Games</a><br>
+    <a href="player.html">Players</a><br>
+    <a href="plays_in.html">Player Game Performance</a><br>
+    <a href="referee.html">Referees</a><br>
+    <a href="team.html">Teams</a><br>
+
+    {% if isDBA %}
+    <a href="dba.html">Database Administrators</a>
+    {% endif %}
+
+  </body>
+
+</html>

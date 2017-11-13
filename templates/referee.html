@@ -8,7 +8,7 @@
   </style>
 
   <body>
-    <h1>referee</h1>
+    <h1>Referees</h1>
     <div>{{data}}</div>
 
     <div>
@@ -17,6 +17,7 @@
     {% endfor %}
     </div>
 
+    {% if isDBA %}
     <form method="POST" action="/add">
         <p>
           ref_id: <input type="text" name="ref_id" maxlength="5"> <br>
@@ -27,6 +28,7 @@
 
         <input type="submit" value="Add"></p>
     </form>
+    {% endif %}
 
   </body>
 
