@@ -44,17 +44,6 @@ DATABASEURI = "postgresql://vs2575:0700@35.196.90.148/proj1part2"
 #
 engine = create_engine(DATABASEURI)
 
-#
-# Example of running queries in your database
-# Note that this will probably not willork if you already have a table named 'test' in your database, containing meaningful data. This is only an example showing you how to run queries in your database using SQLAlchemy.
-#
-engine.execute("""CREATE TABLE IF NOT EXISTS test (
-  id serial,
-  name text
-);""")
-engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
-
-
 @app.before_request
 def before_request():
   """
@@ -83,90 +72,11 @@ def teardown_request(exception):
     pass
 
 
-#
-# @app.route is a decorator around index() that means:
-#   run index() whenever the user tries to access the "/" path using a GET request
-#
-# If you wanted the user to go to, for example, localhost:8111/foobar/ with POST or GET then you could use:
-#
-#       @app.route("/foobar/", methods=["POST", "GET"])
-#
-# PROTIP: (the trailing / in the path is important)
-# 
-# see for routing: http://flask.pocoo.org/docs/0.10/quickstart/#routing
-# see for decorators: http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/
-#
 @app.route('/')
 def index():
-  """
-  request is a special object that Flask provides to access web request information:
 
-  request.method:   "GET" or "POST"
-  request.form:     if the browser submitted a form, this contains the data in the form
-  request.args:     dictionary of URL arguments, e.g., {a:1, b:2} for http://localhost?a=1&b=2
-
-  See its API: http://flask.pocoo.org/docs/0.10/api/#incoming-request-data
-  """
-
-  # DEBUG: this is debugging code to see what request looks like
   print request.args
-
-
-  #
-  # example of a database query
-  #
-  cursor = g.conn.execute("SELECT name FROM test")
-  names = []
-  for result in cursor:
-    names.append(result['name'])  # can also be accessed using result[0]
-  cursor.close()
-
-  #
-  # Flask uses Jinja templates, which is an extension to HTML where you can
-  # pass data to a template and dynamically generate HTML based on the data
-  # (you can think of it as simple PHP)
-  # documentation: https://realpython.com/blog/python/primer-on-jinja-templating/
-  #
-  # You can see an example template in templates/index.html
-  #
-  # context are the variables that are passed to the template.
-  # for example, "data" key in the context variable defined below will be 
-  # accessible as a variable in index.html:
-  #
-  #     # will print: [u'grace hopper', u'alan turing', u'ada lovelace']
-  #     <div>{{data}}</div>
-  #     
-  #     # creates a <div> tag for each element in data
-  #     # will print: 
-  #     #
-  #     #   <div>grace hopper</div>
-  #     #   <div>alan turing</div>
-  #     #   <div>ada lovelace</div>
-  #     #
-  #     {% for n in data %}
-  #     <div>{{n}}</div>
-  #     {% endfor %}
-  #
-  context = dict(data = names)
-
-
-  #
-  # render_template looks in the templates/ folder for files.
-  # for example, the below file reads template/index.html
-  #
-  return render_template("index.html", **context)
-
-#
-# This is an example of a different path.  You can see it at:
-# 
-#     localhost:8111/another
-#
-# Notice that the function name is another() rather than index()
-# The functions for each app.route need to have different names
-#
-@app.route('/another')
-def another():
-  return render_template("another.html")
+  return render_template("index.html")
 
 @app.route('/coach', methods=['GET', 'POST'])
 def coach():
@@ -187,33 +97,208 @@ def coach():
   col_titles = ['Coach ID', 'First Name', 'Last Name', 'Sex', 'Date of Birth', 'Career Wins', 'Career Losses']
 
   cursor = g.conn.execute(sel_st)
-
-  result = []
-
-  for row in cursor:
-    row_string = str(row)
-    row_string = row_string[3:-4]
-    row_string = row_string.split(',')
-    result.append(row_string)
-
-  df = pd.DataFrame(np.array(result), columns=col_titles)
+  df = process_cursor(cursor)
 
   df.loc[df['Sex'] == 't', 'Sex'] = 'F'
   df.loc[df['Sex'] == 'f', 'Sex'] = 'M'
 
-  print result
-  print df
-
   return render_template('coach.html', table=df.to_html())
 
 
-# Example of adding new data to the database
-@app.route('/add', methods=['POST'])
-def add():
-  name = request.form['name']
-  g.conn.execute('INSERT INTO coach (name) VALUES (%s)', name)
-  return redirect('/')
+@app.route('/court', methods=['GET', 'POST'])
+def court():
+  if request.method == 'POST':
+    court_id = request.form['court_id']
+    city = request.form['city']
+    state = request.form['state']
+    zipcode = request.form['zipcode']
 
+    s = "INSERT INTO court (court_id, city, state, zipcode) VALUES ('{}', '{}', '{}', '{}')".format(court_id, city, state, zipcode)
+    print s
+    g.conn.execute(s)
+
+  sel_st = "SELECT (court_id, city, state, zipcode) FROM court"
+  col_titles = ['Court ID', 'City', 'State', 'Zipcode']
+
+  cursor = g.conn.execute(sel_st)
+  df = process_cursor(cursor)
+
+  return render_template('court.html', table=df.to_html())
+
+
+@app.route('/dba', methods=['GET', 'POST'])
+def dba():
+  if request.method == 'POST':
+    dba_id = request.form['dba_id']
+    email = request.form['email']
+    fname = request.form['fname']
+    lname = request.form['lname']
+    dob = request.form['dob']
+    sex = request.form['sex']
+
+    s = "INSERT INTO court (dba_id, email, fname, lname, dob, sex) VALUES ('{}', '{}', '{}', '{}', '{}', '{}')".format(dba_id, email, fname, lname, dob, sex)
+    print s
+    g.conn.execute(s)
+
+  sel_st = "SELECT (dba_id, email, fname, lname, dob, sex) FROM dba"
+  col_titles = ['DBA ID', 'Email', 'First Name', 'Last Name', 'Date of Birth', 'Sex']
+
+  cursor = g.conn.execute(sel_st)
+  df = process_cursor(cursor)
+
+  df.loc[df['Sex'] == 't', 'Sex'] = 'F'
+  df.loc[df['Sex'] == 'f', 'Sex'] = 'M'
+
+  return render_template('dba.html', table=df.to_html())
+
+
+@app.route('/game', methods=['GET', 'POST'])
+def game():
+  if request.method == 'POST':
+    game_id = request.form['game_id']
+    start_date = request.form['start_date']
+    home_id = request.form['home_id']
+    away_id = request.form['away_id']
+    home_score = request.form['home_score']
+    away_score = request.form['away_score']
+    ref_id = request.form['ref_id']
+    is_winner_home = request.form['is_winner_home']
+
+    s = "INSERT INTO court (game_id, start_date, home_id, away_id, home_score, away_score, ref_id, is_winner_home) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(game_id, start_date, home_id, away_id, home_score, away_score, ref_id, is_winner_home)
+    print s
+    g.conn.execute(s)
+
+  sel_st = "SELECT (game_id, start_date, home_id, away_id, home_score, away_score, ref_id, is_winner_home) FROM dba"
+  col_titles = ['Game ID', 'Start Date', 'Home ID', 'Away ID', 'Home Score', 'Away Score', 'Referee']
+
+  cursor = g.conn.execute(sel_st)
+  df = process_cursor(cursor)
+
+  df.loc[df['Sex'] == 't', 'Sex'] = 'F'
+  df.loc[df['Sex'] == 'f', 'Sex'] = 'M'
+
+  return render_template('game.html', table=df.to_html())
+
+@app.route('/player', methods=['GET', 'POST'])
+def player():
+  if request.method == 'POST':
+    player_id = request.form['player_id']
+    fname = request.form['fname']
+    lname = request.form['lname']
+    dob = request.form['dob']
+    height = request.form['height']
+    weight = request.form['weight']
+    is_rhd = request.form['is_rhd']
+    is_injured = request.form['is_injured']
+    hometown = request.form['hometown']
+    college = request.form['college']
+    jersey_number = request.form['jersey_number']
+    team_id = request.form['team_id']
+    is_signed = request.form['is_signed']
+
+    s = "INSERT INTO court (player_id, fname, lname, dob, height, weight, is_rhd, is_injured, hometown, college, jersey_number, team_id, is_signed) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(game_id, start_date, home_id, away_id, home_score, away_score, ref_id, is_winner_home)
+    print s
+    g.conn.execute(s)
+
+  sel_st = "SELECT (player_id, fname, lname, dob, height, weight, is_rhd, is_injured, hometown, college, jersey_number, team_id, is_signed) FROM dba"
+  col_titles = ['Player ID', 'First Name', 'Last Name', 'Date of Birth', 'Height', 'Weight', 'Is Right-Handed?', 'Is Injured?', 'Hometown', 'College', 'Jersey Number', 'Team ID', 'Is Signed']
+
+  cursor = g.conn.execute(sel_st)
+  df = process_cursor(cursor)
+
+  df.loc[df['Is Right-Handed?'] == 't', 'Is Right-Handed?'] = 'Yes'
+  df.loc[df['Is Right-Handed?'] == 'f', 'Is Right-Handed?'] = 'No'
+
+  df.loc[df['Is Injured?'] == 't', 'Is Injured?'] = 'Yes'
+  df.loc[df['Is Injured?'] == 'f', 'Is Injured?'] = 'No'
+
+  df.loc[df['Is Signed?'] == 't', 'Is Signed?'] = 'Yes'
+  df.loc[df['Is Signed?'] == 'f', 'Is Signed?'] = 'No'
+
+  return render_template('player.html', table=df.to_html())
+
+
+@app.route('/plays_in', methods=['GET', 'POST'])
+def plays_in():
+  if request.method == 'POST':
+    player_id = request.form['player_id']
+    fname = request.form['fname']
+    lname = request.form['lname']
+    dob = request.form['dob']
+    height = request.form['height']
+    weight = request.form['weight']
+    is_rhd = request.form['is_rhd']
+    is_injured = request.form['is_injured']
+    hometown = request.form['hometown']
+    college = request.form['college']
+    jersey_number = request.form['jersey_number']
+    team_id = request.form['team_id']
+    is_signed = request.form['is_signed']
+
+    s = "INSERT INTO court (player_id, fname, lname, dob, height, weight, is_rhd, is_injured, hometown, college, jersey_number, team_id, is_signed) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(game_id, start_date, home_id, away_id, home_score, away_score, ref_id, is_winner_home)
+    print s
+    g.conn.execute(s)
+
+  sel_st = "SELECT (player_id, fname, lname, dob, height, weight, is_rhd, is_injured, hometown, college, jersey_number, team_id, is_signed) FROM dba"
+  col_titles = ['Player ID', 'First Name', 'Last Name', 'Date of Birth', 'Height', 'Weight', 'Is Right-Handed?', 'Is Injured?', 'Hometown', 'College', 'Jersey Number', 'Team ID', 'Is Signed']
+
+  cursor = g.conn.execute(sel_st)
+  df = process_cursor(cursor)
+
+  df.loc[df['Is Right-Handed?'] == 't', 'Is Right-Handed?'] = 'Yes'
+  df.loc[df['Is Right-Handed?'] == 'f', 'Is Right-Handed?'] = 'No'
+
+  df.loc[df['Is Injured?'] == 't', 'Is Injured?'] = 'Yes'
+  df.loc[df['Is Injured?'] == 'f', 'Is Injured?'] = 'No'
+
+  df.loc[df['Is Signed?'] == 't', 'Is Signed?'] = 'Yes'
+  df.loc[df['Is Signed?'] == 'f', 'Is Signed?'] = 'No'
+
+  return render_template('dba.html', table=df.to_html())
+
+
+@app.route('/referee', methods=['GET', 'POST'])
+def referee():
+  if request.method == 'POST':
+    ref_id = request.form['ref_id']
+    fname = request.form['fname']
+    lname = request.form['lname']
+    dob = request.form['dob']
+    games_refereed['games_refereed']
+
+    s = "INSERT INTO referee (ref_id, fname, lname, dob, games_refereed) VALUES ('{}', '{}', '{}', '{}', '{}')".format(game_id, start_date, home_id, away_id, home_score, away_score, ref_id, is_winner_home)
+    print s
+    g.conn.execute(s)
+
+  sel_st = "SELECT (ref_id, fname, lname, dob, games_refereed) FROM referee"
+  col_titles = ['Referee ID', 'First Name', 'Last Name', 'Date of Birth', 'Games Refereed']
+
+  cursor = g.conn.execute(sel_st)
+  df = process_cursor(cursor)
+
+  return render_template('referee.html', table=df.to_html())
+
+@app.route('/team', methods=['GET', 'POST'])
+def team():
+  if request.method == 'POST':
+    team_id = request.form['team_id']
+    name = request.form['name']
+    city = request.form['city']
+    coach_id = request.form['coach']
+    court_id = request.form['court_id']
+    wins = request.form['wins']
+
+    s = "INSERT INTO team (team_id, name, city, coach_id, court_id, wins, losses) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(team_id, name, city, coach_id, court_id, wins, losses)
+    print s
+    g.conn.execute(s)
+
+  sel_st = "SELECT (team_id, ) FROM referee"
+  col_titles = ['Team ID', 'Team Name', 'City', 'Coach ID', 'Wins', 'Losses']
+
+  cursor = g.conn.execute(sel_st)
+  df = process_cursor(cursor)
+
+  return render_template('referee.html', table=df.to_html())
 
 @app.route('/login')
 def login():
