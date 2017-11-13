@@ -15,6 +15,8 @@ Read about it online.
 """
 
 import os
+import pandas as pd
+import numpy as np
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response
@@ -44,7 +46,7 @@ engine = create_engine(DATABASEURI)
 
 #
 # Example of running queries in your database
-# Note that this will probably not work if you already have a table named 'test' in your database, containing meaningful data. This is only an example showing you how to run queries in your database using SQLAlchemy.
+# Note that this will probably not willork if you already have a table named 'test' in your database, containing meaningful data. This is only an example showing you how to run queries in your database using SQLAlchemy.
 #
 engine.execute("""CREATE TABLE IF NOT EXISTS test (
   id serial,
@@ -166,19 +168,50 @@ def index():
 def another():
   return render_template("another.html")
 
-# @app.route('/coach')
-# def coach()
-  
-# print coach
+@app.route('/coach', methods=['GET', 'POST'])
+def coach():
+  if request.method == 'POST':
+    coach_id = request.form['coach_id']
+    fname = request.form['fname']
+    lname = request.form['lname']
+    sex = request.form['sex']
+    dob = request.form['dob']
+    c_wins = request.form['c_wins']
+    c_losses = request.form['c_losses']
 
-#   return render_template('coach.html')
+    s = "INSERT INTO coach (coach_id, fname, lname, sex, dob, c_wins, c_losses) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(coach_id, fname, lname, sex, dob, c_wins, c_losses)
+    print s
+    g.conn.execute(s)
+
+  sel_st = "SELECT (coach_id, fname, lname, sex, dob, c_wins, c_losses) FROM coach"
+  col_titles = ['Coach ID', 'First Name', 'Last Name', 'Sex', 'Date of Birth', 'Career Wins', 'Career Losses']
+
+  cursor = g.conn.execute(sel_st)
+
+  result = []
+
+  for row in cursor:
+    row_string = str(row)
+    row_string = row_string[3:-4]
+    row_string = row_string.split(',')
+    result.append(row_string)
+
+  df = pd.DataFrame(np.array(result), columns=col_titles)
+
+  df.loc[df['Sex'] == 't', 'Sex'] = 'F'
+  df.loc[df['Sex'] == 'f', 'Sex'] = 'M'
+
+  print result
+  print df
+
+  return render_template('coach.html', table=df.to_html())
 
 
 # Example of adding new data to the database
 @app.route('/add', methods=['POST'])
 def add():
   name = request.form['name']
-  g.conn.execute('INSERT INTO test (name) VALUES (%s)', name)
+  g.conn.execute('INSERT INTO coach (name) VALUES (%s)', name)
   return redirect('/')
 
 
