@@ -9,14 +9,13 @@
 
   <body>
     <h1>Database Administrators</h1>
-    <div>{{data}}</div>
 
+    {% if isDBA %}
     <div>
-    {% for n in data %}
-    <div>{{n}}</div>
-    {% endfor %}
+      <span style="float:right"><a href="signin">Sign Out</a></span><br/>
     </div>
-
+    {% endif %}
+    
     <form method="POST" action="/add">
         <p>
 
