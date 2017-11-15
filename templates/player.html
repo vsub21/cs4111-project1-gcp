@@ -17,7 +17,10 @@
     }
   </style>
 
+  <title>NBA Database Project - Players </title>
+
   <body>
+  <div class=container>
   <h1><strong>NBA Database Project</strong></h1>
     <h1>Players</h1>
 
@@ -29,9 +32,11 @@
     {% endif %}
 
     {% if isDBA %}
-    <form method="POST" action="/player">
-        <p>
-
+    <form method="POST" action="/player">
+              <div class="container" style="border:2px solid #4259f4">
+      <h3 style="color:#4259f4"><strong>Add a Player</strong></h3>
+      <h4 style="color:#4259f4"> DBA-access only </h4>
+      <br><p>
           player_id: <input type="text" name="coach_id" maxlength="5"> <br>
           fname: <input type="text" name="fname" maxlength="80"> <br>
           lname: <input type="text" name="lname" maxlength="80"> <br>
@@ -47,14 +52,34 @@
           is_signed: <input type="radio" name="is_signed" value="0">Not Signed  <input type="radio" name="is_signed" value="1">Signed<br>
 
         <input type="submit" value="Add"></p>
+        </div>
     </form>
+    {% endif %}
+        <br>
+    <div class=container>
+    <form method="POST" action="/search_player">
+      <strong>Search for a player: </strong><br>
+      First Name: <input type="text" name="player_fname" maxlength="80"> <br>
+      Last Name: <input type="text" name="player_lname" maxlength="80"> <br>
+      <input type="submit" value="Search">
+    </form>
+    </div>
+    <br>
+    {% if isDBA %}
+    <br>
+    <h1 style='color: red'>Raw Game Table (for DBA-use)</h1>
+    <div>
+      {{ table_dba|safe }}
+    </div>
+      </div>
     {% endif %}
 
     <br>
-    <div>
-      {{ table|safe }}
+    <br>
+        <div>
+      {{ table_user|safe }}
     </div>
-
+      </div>
   </body>
 
 </html>

@@ -17,9 +17,14 @@
     }
   </style>
 
+  <title>NBA Database Project - Courts </title>
+
   <body>
+  <div class=container>
   <h1><strong>NBA Database Project</strong></h1>
-    <h1>Courts</h1>
+    
+  <h1>Courts</h1>
+
 
     {% if isDBA %}
     <div>
@@ -28,9 +33,10 @@
     </div>
     {% endif %}
 
+
     {% if isDBA %}
-        <div class="container" style="border:2px solid #4259f4">
-      <h3 style="color:#4259f4"><strong>Add a Court</strong></h3>
+    <div class="container" style="border:2px solid #4259f4">
+      <h3 style="color:#4259f4"><strong>Add a Court</strong></h3>
       <h4 style="color:#4259f4"> DBA-access only </h4>
       <br>
     <form method="POST" action="/add">
@@ -41,6 +47,7 @@
           zipcode: <input type="number" name="zipcode"> <br>
         <input type="submit" value="Add"></p>
     </form>
+    <br>
     </div>
     {% endif %}
 
@@ -48,7 +55,7 @@
     <div>
       {{ table|safe }}
     </div>
-
+      </div>
   </body>
 
 </html>

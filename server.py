@@ -148,6 +148,23 @@ def coach():
 
   return render_template('coach.html', table=df.to_html(), isDBA=isDBA)
 
+@app.route('/search_coach', methods=['GET', 'POST'])
+def search_coach():
+  global isDBA
+  if request.method == 'POST':
+    fname = request.form['coach_fname']
+    lname = request.form['coach_lname']
+
+    sel_st = """
+    SELECT coach_id AS "Coach ID", fname AS "First Name", lname AS "Last Name", sex AS "Sex", dob AS "Date of Birth", c_wins AS "Career Wins", c_losses AS "Career Losses" 
+    FROM coach C 
+    WHERE fname = '{}' AND lname = '{}'
+    """.format(fname, lname)
+
+    df = pd.read_sql_query(sql=sel_st, con=engine)
+
+    return render_template('search.html', table=df.to_html(), isDBA=isDBA)
+
 
 @app.route('/court', methods=['GET', 'POST'])
 def court():
@@ -214,11 +231,10 @@ def game():
     print s
     g.conn.execute(s)
 
-  sel_st_dba = 'SELECT (game_id, start_date, home_id, away_id, home_score, away_score, ref_id, is_winner_home) FROM game'
-  col_titles = ['Game ID', 'Start Date', 'Home ID', 'Away ID', 'Home Score', 'Away Score', 'Referee ID', 'Is Winner Home?']
-
-  cursor = g.conn.execute(sel_st_dba)
-  df_dba = process_cursor(cursor, None)
+  sel_st_dba = """
+  SELECT game_id as "Game ID", start_date as "Start Date", home_id as "Home Team ID", away_id as "Away Team ID", home_score "Home Team Score", away_score as "Away Team Score", ref_id as "Referee ID", is_winner_home as "Is Winner Home?" FROM game
+  """
+  df_dba = pd.read_sql_query(sql=sel_st_dba, con=engine)
 
   sel_st_user = '''
   SELECT G.start_date AS "Start Date", TH.name AS "Home Team", G.home_score AS "Home Score", TA.name "Away Team", G.away_score AS "Away Score", R.lname AS "Referee Name", G.is_winner_home AS "Did Home Team Win?"
@@ -253,60 +269,57 @@ def player():
     print s
     g.conn.execute(s)
 
-  sel_st = "SELECT (player_id, fname, lname, dob, height, weight, is_rhd, is_injured, hometown, college, jersey_number, team_id, is_signed) FROM player"
-  col_titles = ['Player ID', 'First Name', 'Last Name', 'Date of Birth', 'Height', 'Weight', 'Is Right-Handed?', 'Is Injured?', 'Hometown', 'College', 'Jersey Number', 'Team ID', 'Is Signed?']
+  sel_st_dba = """
+  SELECT player_id AS "Player ID", fname AS "First Name", lname AS "Last Name", dob AS "Date of Birth", height AS "Height", weight AS "Weight", is_rhd "Is Right-Handed?", is_injured AS "Is Injured?", hometown AS "Hometown", college AS "College", jersey_number AS "Jersey Number", team_id AS "Team ID", is_signed AS "Is Signed?" FROM player
+  """
+  df_dba = pd.read_sql_query(sql=sel_st_dba, con=engine)
 
-  cursor = g.conn.execute(sel_st)
-  df = process_cursor(cursor, col_titles)
+  sel_st_user = """
+  SELECT P.fname AS "First Name", P.lname AS "Last Name", P.dob AS "Date of Birth", P.height AS "Height", P.weight AS "Weight", P.is_rhd "Is Right-Handed?", P.is_injured AS "Is Injured?", P.hometown AS "Hometown", P.college AS "College", jersey_number AS "Jersey Number", T.name AS "Team", P.is_signed AS "Is Signed?" 
+  FROM player P
+  INNER JOIN Team T ON (P.team_id = T.team_id)
+  """
 
-  df.loc[df['Is Right-Handed?'] == 't', 'Is Right-Handed?'] = 'Yes'
-  df.loc[df['Is Right-Handed?'] == 'f', 'Is Right-Handed?'] = 'No'
-
-  df.loc[df['Is Injured?'] == 't', 'Is Injured?'] = 'Yes'
-  df.loc[df['Is Injured?'] == 'f', 'Is Injured?'] = 'No'
-
-  df.loc[df['Is Signed?'] == 't', 'Is Signed?'] = 'Yes'
-  df.loc[df['Is Signed?'] == 'f', 'Is Signed?'] = 'No'
+  df_user = pd.read_sql_query(sql=sel_st_user, con=engine)
 
   print isDBA
-  return render_template('player.html', table=df.to_html(), isDBA=isDBA)
+  return render_template('player.html', table_dba=df_dba.to_html(), table_user=df_user.to_html(), isDBA=isDBA)
+
+@app.route('/search_player', methods=['GET','POST'])
+def search_player():
+  global isDBA
+  if request.method == 'POST':
+    fname = request.form['player_fname']
+    lname = request.form['player_lname']
+
+    sel_st = """
+    SELECT player_id AS "Player ID", fname AS "First Name", lname AS "Last Name", dob AS "Date of Birth", height AS "Height", weight AS "Weight", is_rhd "Is Right-Handed?", is_injured AS "Is Injured?", hometown AS "Hometown", college AS "College", jersey_number AS "Jersey Number", team_id AS "Team ID", is_signed AS "Is Signed?" 
+    FROM player
+    WHERE fname = '{}' AND lname = '{}'
+    """.format(fname, lname)
+
+    df = pd.read_sql_query(sql=sel_st, con=engine)
+
+    return render_template('search.html', table=df.to_html(), isDBA=isDBA)
+
 
 
 @app.route('/plays_in', methods=['GET', 'POST'])
 def plays_in():
   if request.method == 'POST':
     player_id = request.form['player_id']
-    fname = request.form['fname']
-    lname = request.form['lname']
-    dob = request.form['dob']
-    height = request.form['height']
-    weight = request.form['weight']
-    is_rhd = request.form['is_rhd']
-    is_injured = request.form['is_injured']
-    hometown = request.form['hometown']
-    college = request.form['college']
-    jersey_number = request.form['jersey_number']
-    team_id = request.form['team_id']
-    is_signed = request.form['is_signed']
+    
 
-    s = "INSERT INTO court (player_id, fname, lname, dob, height, weight, is_rhd, is_injured, hometown, college, jersey_number, team_id, is_signed) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(game_id, start_date, home_id, away_id, home_score, away_score, ref_id, is_winner_home)
+    s = "INSERT INTO court (player_id, game_id, fg, fga, tp, tpa, pts, ast, stl, blk, tov, pf) VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}')".format(player_id, game_id, fg, fga, tp, tpa, pts, ast, stl, blk, tov, pf)
     print s
     g.conn.execute(s)
 
-  sel_st = "SELECT (player_id, fname, lname, dob, height, weight, is_rhd, is_injured, hometown, college, jersey_number, team_id, is_signed) FROM player"
-  col_titles = ['Player ID', 'First Name', 'Last Name', 'Date of Birth', 'Height', 'Weight', 'Is Right-Handed?', 'Is Injured?', 'Hometown', 'College', 'Jersey Number', 'Team ID', 'Is Signed']
+  sel_st = """
+  SELECT PI.fg as "FG", PI.fga as "FGA", PI.tp as "TP", PI.tpa as "TPA", PI.pts as "PTS", PI.ast as "AST", PI.stl as "STL", PI.blk as "BLK", PI.tov as "TOV", PI.pf as "PF"
+  FROM PI Plays_In
+  """
 
-  cursor = g.conn.execute(sel_st)
-  df = process_cursor(cursor, col_titles)
-
-  df.loc[df['Is Right-Handed?'] == 't', 'Is Right-Handed?'] = 'Yes'
-  df.loc[df['Is Right-Handed?'] == 'f', 'Is Right-Handed?'] = 'No'
-
-  df.loc[df['Is Injured?'] == 't', 'Is Injured?'] = 'Yes'
-  df.loc[df['Is Injured?'] == 'f', 'Is Injured?'] = 'No'
-
-  df.loc[df['Is Signed?'] == 't', 'Is Signed?'] = 'Yes'
-  df.loc[df['Is Signed?'] == 'f', 'Is Signed?'] = 'No'
+  df = pd.read_sql_query(sql=sel_st, con=engine)
 
   print isDBA
   return render_template('dba.html', table=df.to_html(), isDBA=isDBA)
@@ -359,6 +372,37 @@ def team():
   return render_template('team.html', table=df.to_html())
 
 
+## Special Queries: ##
+
+@app.route('/top-scoring-players', methods=['GET', 'POST'])
+def top_scoring_players():
+  global isDBA
+  sel_st = """
+  SELECT G.start_date AS "Game Date", T.name as "Team Name", P.fname as "First Name", P.lname AS "Last Name", PI.pts as "PTS",PI.fg as "FG", PI.fga as "FGA", PI.tp as "TP", PI.tpa as "TPA", PI.ast as "AST", PI.stl as "STL", PI.blk as "BLK", PI.tov as "TOV", PI.pf as "PF"
+  FROM Player P
+  INNER JOIN Team T ON (P.team_id = T.team_id)
+  INNER JOIN Plays_In PI ON (P.player_id = PI.player_id)
+  INNER JOIN Game G ON (G.game_id = PI.game_id)
+  ORDER BY PI.pts DESC
+  LIMIT 5
+  """
+
+  df = pd.read_sql_query(sql=sel_st, con=engine)
+
+  return render_template('top-scoring-players.html', table=df.to_html(), isDBA=isDBA)
+
+@app.route('/', methods=['GET', 'POST'])
+def s():
+  global isDBA
+  sel_st = """
+  """
+
+  df = pd.read_sql_query(sql=sel_st, con=engine)
+
+  return render_template('.html', table=df.to_html(), isDBA=isDBA)
+
+
+
 if __name__ == "__main__":
   import click
 
@@ -386,3 +430,13 @@ if __name__ == "__main__":
 
 
   run()
+
+sel_st = """
+SELECT G.start_date AS "Game Date", T.name as "Team Name", P.fname as "First Name", P.lname AS "Last Name", PI.pts as "PTS",PI.fg as "FG", PI.fga as "FGA", PI.tp as "TP", PI.tpa as "TPA", PI.ast as "AST", PI.stl as "STL", PI.blk as "BLK", PI.tov as "TOV", PI.pf as "PF"
+FROM Player P
+INNER JOIN Team T ON (P.team_id = T.team_id)
+INNER JOIN Plays_In PI ON (P.player_id = PI.player_id)
+INNER JOIN Game G ON (G.game_id = PI.game_id)
+ORDER BY PI.pts DESC
+"""
+

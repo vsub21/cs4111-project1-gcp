@@ -17,9 +17,14 @@
     }
   </style>
 
+  <title>NBA Database Project - Games </title>
+
   <body>
+  <div class=container>
   <h1><strong>NBA Database Project</strong></h1>
-    <h1>Games</h1>
+    
+    <h1>Games</h1>
+
 
     {% if isDBA %}
     <div>
@@ -29,9 +34,11 @@
     {% endif %}
 
     {% if isDBA %}
+        <div class="container" style="border:2px solid #4259f4">
+      <h3 style="color:#4259f4"><strong>Add a Coach</strong></h3>
+      <h4 style="color:#4259f4"> DBA-access only </h4>
+      <br>
     <form method="POST" action="/game">
-        <p>
-
           game_id: <input type="text" name="game_id" maxlength="5"> <br>
           start_date: <input type="date" class="form-control" name="start_date" placeholder="MM/DD/YYYY"/> <br>
           home_id: <input type="text" name="home_id" maxlength="5"> <br>
@@ -39,14 +46,15 @@
           home_score: <input type="number" name="home_score"> <br>
           away_score: <input type="number" name="away_score"> <br>
           ref_id: <input type="text" name="ref_id" maxlength="5"> <br>
-          is_winner_home: <input type="radio" name="is_winner_home" value="0">Away Team Wins  <input type="radio" name="is_winner_home" value="1">Home Team Wins<br>
+          is_winner_home: <input type="radio" name="is_winner_home" value="0">false  <input type="radio" name="is_winner_home" value="1">true<br>
 
         <input type="submit" value="Add"></p>
     </form>
+    </div>
     {% endif %}
 
     {% if isDBA %}
-    <h1 style='color: red'>DBA Debug: table game</h1>
+    <h1 style='color: red'>Raw Game Table (for DBA-use)</h1>
     <br>
     <div>
       {{ table_dba|safe }}

@@ -19,7 +19,9 @@
 
 
   <body>
+  <div class=container>
   <h1><strong>NBA Database Project</strong></h1>
+    
     <h1>Coaches</h1>
 
 
@@ -52,11 +54,20 @@
 
     <br>
     <div class=container>
+    <form method="POST" action="/search_coach">
+      <strong>Search for a coach: </strong><br>
+      First Name: <input type="text" name="coach_fname" maxlength="80"> <br>
+      Last Name: <input type="text" name="coach_lname" maxlength="80"> <br>
+      <input type="submit" value="Search">
+    </form>
+    </div>
+    <br>
+    <br>
+    <div class=container>
       {{ table|safe }}
     </div>
-    <p>
 
-
+    </div>
   </body>
 
 </html>

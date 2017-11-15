@@ -17,9 +17,14 @@
     }
   </style>
 
+  
+
   <body>
+  <div class=container>
   <h1><strong>NBA Database Project</strong></h1>
-    <h1>Database Administrators</h1>
+    
+    <h1>Database Administrators</h1>
+
 
     {% if isDBA %}
     <div>
@@ -27,7 +32,12 @@
       <span style="float:right"><a href="signout">Sign Out</a></span><br/>
     </div>
     {% endif %}
-    
+
+    {% if isDBA %}
+    <div class="container" style="border:2px solid #4259f4">
+      <h3 style="color:#4259f4"><strong>Add a DBA</strong></h3>
+      <h4 style="color:#4259f4"> DBA-access only </h4>
+      <br>
     <form method="POST" action="/dba">
         <p>
 
@@ -39,10 +49,12 @@
           sex: <input type="radio" name="sex" value="0">Male<br>  <input type="radio" name="sex" value="1">Female<br>
 
         <input type="submit" value="Add"></p>
+        <br>
     </form>
+    </div>
+    {% endif %}
 
     {% if isDBA %}
-    <h1 style='color: red'>DBA Debug: table dba</h1>
     <br>
     <div>
       {{ table|safe }}
