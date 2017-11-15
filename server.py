@@ -44,7 +44,7 @@ DATABASEURI = "postgresql://vs2575:0700@35.196.90.148/proj1part2"
 #
 engine = create_engine(DATABASEURI)
 
-isDBA = false
+isDBA = False
 
 @app.before_request
 def before_request():
@@ -77,24 +77,32 @@ def teardown_request(exception):
 
 @app.route('/')
 def signin():
-  return render_template('signin.html')
+  global isDBA
+  isDBA = False
+  print "at signin(), dba is " + str(isDBA)
+  return render_template('signin.html', isDBA=isDBA)
 
 
 @app.route('/enable_dba')
 def enable_dba():
+  global isDBA
   isDBA = True
+  print "at enable_dba(), dba is " + str(isDBA)
   return render_template('index.html', isDBA=isDBA)
 
 
-@app.route('/signout')
+@app.route('/signout')
 def signout():
+  global isDBA
   isDBA = False
-  return redirect(url_for('/'))
+  print "at signout(), dba is " + str(isDBA)
+  return render_template('signin.html', isDBA=isDBA)
 
 
 @app.route('/index')
 def index():
   print request.args
+  print "at index(), dba is " + str(isDBA)
   return render_template('index.html', isDBA=isDBA)
 
 
@@ -115,6 +123,7 @@ def process_cursor(cursor, col_titles):
 
 @app.route('/coach', methods=['GET', 'POST'])
 def coach():
+  print "at coach(), dba is " + str(isDBA)
   if request.method == 'POST':
     coach_id = request.form['coach_id']
     fname = request.form['fname']
@@ -137,7 +146,6 @@ def coach():
   df.loc[df['Sex'] == 't', 'Sex'] = 'F'
   df.loc[df['Sex'] == 'f', 'Sex'] = 'M'
 
-  print isDBA
   return render_template('coach.html', table=df.to_html(), isDBA=isDBA)
 
 
@@ -173,7 +181,7 @@ def dba():
     dob = request.form['dob']
     sex = request.form['sex']
 
-    s = "INSERT INTO dba (dba_id, email, fname, lname, dob, sex) VALUES ('{}', '{}', '{}', '{}', '{}', '{}')".format(dba_id, email, fname, lname, dob, sex)
+    s = "INSERT INTO dba (dba_id, email, fname, lname, dob, sex) VALUES ('{}', '{}', '{}', '{}', '{}', '{}')".format(dba_id, email, fname, lname, dob, sex)
     print s
     g.conn.execute(s)
 
@@ -220,11 +228,11 @@ def game():
   '''
   df_user = pd.read_sql_query(sql=sel_st_user, con=engine)
 
-  print isDBA
+  print isDBA   
   return render_template('game.html', table_dba=df_dba.to_html(), table_user=df_user.to_html(), isDBA=isDBA)
 
 
-@app.route('/player', methods=['GET', 'POSTx'])
+@app.route('/player', methods=['GET', 'POST'])
 def player():
   if request.method == 'POST':
     player_id = request.form['player_id']
@@ -245,8 +253,8 @@ def player():
     print s
     g.conn.execute(s)
 
-  sel_st = "SELECT (player_id, fname, lname, dob, height, weight, is_rhd, is_injured, hometown, college, jersey_number, team_id, is_signed) FROM court"
-  col_titles = ['Player ID', 'First Name', 'Last Name', 'Date of Birth', 'Height', 'Weight', 'Is Right-Handed?', 'Is Injured?', 'Hometown', 'College', 'Jersey Number', 'Team ID', 'Is Signed']
+  sel_st = "SELECT (player_id, fname, lname, dob, height, weight, is_rhd, is_injured, hometown, college, jersey_number, team_id, is_signed) FROM player"
+  col_titles = ['Player ID', 'First Name', 'Last Name', 'Date of Birth', 'Height', 'Weight', 'Is Right-Handed?', 'Is Injured?', 'Hometown', 'College', 'Jersey Number', 'Team ID', 'Is Signed?']
 
   cursor = g.conn.execute(sel_st)
   df = process_cursor(cursor, col_titles)
@@ -341,14 +349,14 @@ def team():
     print s
     g.conn.execute(s)
 
-  sel_st = "SELECT (team_id, ) FROM referee"
-  col_titles = ['Team ID', 'Team Name', 'City', 'Coach ID', 'Wins', 'Losses']
+  sel_st = "SELECT (team_id, name, city, coach_id, court_id, wins, losses) FROM team"
+  col_titles = ['Team ID', 'Team Name', 'City', 'Coach ID', 'Court ID', 'Wins', 'Losses']
 
   cursor = g.conn.execute(sel_st)
   df = process_cursor(cursor, col_titles)
 
   print isDBA
-  return render_template('referee.html', table=df.to_html())
+  return render_template('team.html', table=df.to_html())
 
 
 if __name__ == "__main__":

@@ -1,5 +1,14 @@
 <!DOCTYPE html>
 
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
 <html>
   <style>
     body{
@@ -10,31 +19,39 @@
 
 
   <body>
+  <h1><strong>NBA Database Project</strong></h1>
     <h1>Coaches</h1>
+
 
     {% if isDBA %}
     <div>
+      <span style="float:right">Signed in as Database Administrator.</span><br>
       <span style="float:right"><a href="signout">Sign Out</a></span><br/>
     </div>
     {% endif %}
 
     {% if isDBA %}
-
+    <div class="container" style="border:2px solid #4259f4">
+      <h3 style="color:#4259f4"><strong>Add a Coach</strong></h3>
+      <h4 style="color:#4259f4"> DBA-access only </h4>
+      <br>
       <form method="POST" action="/coach">
-        id: <input type="text" name="coach_id" maxlength="5"> <br>
+        Coach ID: <input type="text" name="coach_id" maxlength="5"> <br>
         First Name: <input type="text" name="fname" maxlength="80"> <br>
         Last Name: <input type="text" name="lname" maxlength="80"> <br>
-        Sex: <input type="radio" name="sex" value="0">Male<br>  <input type="radio" name="sex" value="1">Female<br>
+        Sex: <input type="radio" name="sex" value="0"> Male<br>  <input type="radio" name="sex" value="1"> Female<br>
         Date of Birth: <input type="date" class="form-control" name="dob" placeholder="MM/DD/YYYY"/> <br>
         Number of Wins: <input type="number" name="c_wins"> <br>
         Number of Losses: <input type="number" name="c_losses"> <br>
         <input type="submit" value="Add">
       </form>
+      <br>
+    </div>
 
     {% endif %}
 
     <br>
-    <div>
+    <div class=container>
       {{ table|safe }}
     </div>
     <p>
