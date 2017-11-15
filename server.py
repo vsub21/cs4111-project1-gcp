@@ -308,21 +308,42 @@ def search_player():
 def plays_in():
   if request.method == 'POST':
     player_id = request.form['player_id']
-    
+    game_id = request.form['game_id']
+    fg = request.form['fg']
+    fga = request.form['fga']
+    tp = request.form['tp']
+    tpa = request.form['tpa']
+    pts = request.form['pts']
+    ast = request.form['ast']
+    stl = request.form['stl']
+    blk = request.form['blk']
+    tov = request.form['tov']
+    pf = request.form['pf']    
 
     s = "INSERT INTO court (player_id, game_id, fg, fga, tp, tpa, pts, ast, stl, blk, tov, pf) VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}')".format(player_id, game_id, fg, fga, tp, tpa, pts, ast, stl, blk, tov, pf)
     print s
     g.conn.execute(s)
 
-  sel_st = """
-  SELECT PI.fg as "FG", PI.fga as "FGA", PI.tp as "TP", PI.tpa as "TPA", PI.pts as "PTS", PI.ast as "AST", PI.stl as "STL", PI.blk as "BLK", PI.tov as "TOV", PI.pf as "PF"
-  FROM PI Plays_In
+  sel_st_dba = """
+  SELECT PI.player_id as "Player ID", PI.game_id as "Game ID", PI.fg as "FG", PI.fga as "FGA", PI.tp as "TP", PI.tpa as "TPA", PI.pts as "PTS", PI.ast as "AST", PI.stl as "STL", PI.blk as "BLK", PI.tov as "TOV", PI.pf as "PF"
+  FROM Plays_In PI
   """
 
-  df = pd.read_sql_query(sql=sel_st, con=engine)
+  df_dba = pd.read_sql_query(sql=sel_st_dba, con=engine)
+
+  sel_st_user = """
+  SELECT G.start_date as "Date", T.name as "Team", P.fname as "First Name", P.lname as "Last Name", PI.fg as "FG", PI.fga as "FGA", PI.tp as "TP", PI.tpa as "TPA", PI.pts as "PTS", PI.ast as "AST", PI.stl as "STL", PI.blk as "BLK", PI.tov as "TOV", PI.pf as "PF"
+  FROM Plays_In PI
+  INNER JOIN Player P ON (P.player_id = PI.player_id)
+  INNER JOIN Team T ON (P.team_id = T.team_id)
+  INNER JOIN Game G ON (G.game_id = PI.game_id)
+  ORDER BY "Date"
+  """
+
+  df_user = pd.read_sql_query(sql=sel_st_user, con=engine)
 
   print isDBA
-  return render_template('dba.html', table=df.to_html(), isDBA=isDBA)
+  return render_template('plays_in.html', table_dba=df_dba.to_html(), table_user=df_user.to_html(), isDBA=isDBA)
 
 
 @app.route('/referee', methods=['GET', 'POST'])
@@ -391,6 +412,24 @@ def top_scoring_players():
 
   return render_template('top-scoring-players.html', table=df.to_html(), isDBA=isDBA)
 
+@app.route('/three-point-kings', methods=['GET', 'POST'])
+def three_point_kings():
+  global isDBA
+  sel_st = """
+  SELECT G.start_date AS "Game Date", T.name as "Team Name", P.fname as "First Name", P.lname AS "Last Name", PI.pts as "PTS",PI.fg as "FG", PI.fga as "FGA", PI.tp as "TP", PI.tpa as "TPA", PI.ast as "AST", PI.stl as "STL", PI.blk as "BLK", PI.tov as "TOV", PI.pf as "PF"
+  FROM Player P
+  INNER JOIN Team T ON (P.team_id = T.team_id)
+  INNER JOIN Plays_In PI ON (P.player_id = PI.player_id)
+  INNER JOIN Game G ON (G.game_id = PI.game_id)
+  ORDER BY PI.pts DESC
+  WHERE 
+  LIMIT 5
+  """
+
+  df = pd.read_sql_query(sql=sel_st, con=engine)
+
+  return render_template('top-scoring-players.html', table=df.to_html(), isDBA=isDBA)
+
 @app.route('/', methods=['GET', 'POST'])
 def s():
   global isDBA
@@ -431,12 +470,12 @@ if __name__ == "__main__":
 
   run()
 
-sel_st = """
-SELECT G.start_date AS "Game Date", T.name as "Team Name", P.fname as "First Name", P.lname AS "Last Name", PI.pts as "PTS",PI.fg as "FG", PI.fga as "FGA", PI.tp as "TP", PI.tpa as "TPA", PI.ast as "AST", PI.stl as "STL", PI.blk as "BLK", PI.tov as "TOV", PI.pf as "PF"
-FROM Player P
-INNER JOIN Team T ON (P.team_id = T.team_id)
-INNER JOIN Plays_In PI ON (P.player_id = PI.player_id)
-INNER JOIN Game G ON (G.game_id = PI.game_id)
-ORDER BY PI.pts DESC
-"""
+# sel_st = """
+# SELECT G.start_date AS "Game Date", T.name as "Team Name", P.fname as "First Name", P.lname AS "Last Name", PI.pts as "PTS",PI.fg as "FG", PI.fga as "FGA", PI.tp as "TP", PI.tpa as "TPA", PI.ast as "AST", PI.stl as "STL", PI.blk as "BLK", PI.tov as "TOV", PI.pf as "PF"
+# FROM Player P
+# INNER JOIN Team T ON (P.team_id = T.team_id)
+# INNER JOIN Plays_In PI ON (P.player_id = PI.player_id)
+# INNER JOIN Game G ON (G.game_id = PI.game_id)
+# ORDER BY PI.pts DESC
+# """
 

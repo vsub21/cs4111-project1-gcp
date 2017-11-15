@@ -20,6 +20,7 @@
   <title>NBA Database Project - Player Game Performance</title>
 
   <body>
+  <div class=container>
   <h1><strong>NBA Database Project</strong></h1>
     <h1>Player Game Performances</h1>
 
@@ -33,7 +34,9 @@
     {% if isDBA %}
     <form method="POST" action="/plays_in">
         <p>
-
+              <div class="container" style="border:2px solid #4259f4">
+      <h3 style="color:#4259f4"><strong>Add a Player Game Performance</strong></h3>
+      <h4 style="color:#4259f4"> DBA-access only </h4>
           player_id: <input type="text" name="coach_id" maxlength="5"> <br>
           game_id: <input type="text" name="game_id" maxlength="5"> <br>
 
@@ -49,14 +52,22 @@
           pf: <input type="number" name="pf"> <br>
 
         <input type="submit" value="Add"></p>
+        
     </form>
     {% endif %}
-
+    {% if isDBA %}
+    <br>
+    <h1 style='color: red'>Raw Plays_In Table (for DBA-use)</h1>
+    <div>
+      {{ table_dba|safe }}
+    </div>
+      </div>
+    {% endif %}
     <br>
     <div>
-      {{ table|safe }}
+      {{ table_user|safe }}
     </div>
-
+</div>
   </body>
 
 </html>
