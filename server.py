@@ -15,6 +15,7 @@ Read about it online.
 """
 
 import os
+import re
 import pandas as pd
 import numpy as np
 from sqlalchemy import *
@@ -190,6 +191,7 @@ def court():
 
 @app.route('/dba', methods=['GET', 'POST'])
 def dba():
+  # invalidEntry = False
   if request.method == 'POST':
     dba_id = request.form['dba_id']
     email = request.form['email']
@@ -198,9 +200,15 @@ def dba():
     dob = request.form['dob']
     sex = request.form['sex']
 
-    s = "INSERT INTO dba (dba_id, email, fname, lname, dob, sex) VALUES ('{}', '{}', '{}', '{}', '{}', '{}')".format(dba_id, email, fname, lname, dob, sex)
-    print s
-    g.conn.execute(s)
+    # hasValidEmail = re.match("[^@]+@[^@]+\.[^@]+", email)
+    # hasEmptyString = (len(dba_id) is 0) or (len(email) is 0) or (len(fname) is 0) or (len(lname) is 0) or (len(dob) is 0) or (len(sex) is 0)
+
+    # if (hasValidEmail and not hasEmptyString):
+    #   s = "INSERT INTO dba (dba_id, email, fname, lname, dob, sex) VALUES ('{}', '{}', '{}', '{}', '{}', '{}')".format(dba_id, email, fname, lname, dob, sex)
+    #   print s
+    #   g.conn.execute(s)
+    # else:
+    #   invalidEntry = True
 
   sel_st = "SELECT (dba_id, email, fname, lname, dob, sex) FROM dba"
   col_titles = ['DBA ID', 'Email', 'First Name', 'Last Name', 'Date of Birth', 'Sex']
@@ -213,6 +221,7 @@ def dba():
 
   print isDBA
   return render_template('dba.html', table=df.to_html(), isDBA=isDBA)
+  # return render_template('dba.html', table=df.to_html(), isDBA=isDBA, invalidEntry=invalidEntry)
 
 
 @app.route('/game', methods=['GET', 'POST'])
@@ -242,7 +251,7 @@ def game():
   WHERE G.home_id = TH.team_id AND G.away_id = TA.team_id AND G.ref_id = R.ref_id
   ORDER BY G.start_date
   '''
-  df_user = pd.read_sql_query(sql=sel_st_user, con=engine)
+  df_user = pd.read_sql_query(sel_st_user, con=engine)
 
   print isDBA   
   return render_template('game.html', table_dba=df_dba.to_html(), table_user=df_user.to_html(), isDBA=isDBA)
