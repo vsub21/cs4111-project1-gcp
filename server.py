@@ -25,24 +25,8 @@ from flask import Flask, request, render_template, g, redirect, Response
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
 
-
-#
-# The following is a dummy URI that does not connect to a valid database. You will need to modify it to connect to your Part 2 database in order to use the data.
-#
-# XXX: The URI should be in the format of: 
-#
-#     postgresql://USER:PASSWORD@104.196.18.7/w4111
-#
-# For example, if you had username biliris and password foobar, then the following line would be:
-#
-#     DATABASEURI = "postgresql://biliris:foobar@104.196.18.7/w4111"
-#
 DATABASEURI = "postgresql://vs2575:0700@35.196.90.148/proj1part2"
 
-
-#
-# This line creates a database engine that knows how to connect to the URI above.
-#
 engine = create_engine(DATABASEURI)
 
 isDBA = False
@@ -50,7 +34,7 @@ isDBA = False
 @app.before_request
 def before_request():
   """
-  This function is run at the beginning of every web request 
+  This function is run at the beginning of every web request
   (every time you enter an address in the web browser).
   We use it to setup a database connection that can be used throughout the request.
 
@@ -121,9 +105,9 @@ def process_cursor(cursor, col_titles):
 
   return pd.DataFrame(np.array(result))
 
-
 @app.route('/coach', methods=['GET', 'POST'])
 def coach():
+  global isDBA
   print "at coach(), dba is " + str(isDBA)
   if request.method == 'POST':
     coach_id = request.form['coach_id']
@@ -138,16 +122,21 @@ def coach():
     print s
     g.conn.execute(s)
 
-  sel_st = "SELECT (coach_id, fname, lname, sex, dob, c_wins, c_losses) FROM coach"
-  col_titles = ['Coach ID', 'First Name', 'Last Name', 'Sex', 'Date of Birth', 'Career Wins', 'Career Losses']
+  sel_st = "SELECT coach_id, fname, lname, sex, dob, c_wins, c_losses FROM coach"
 
   cursor = g.conn.execute(sel_st)
-  df = process_cursor(cursor, col_titles)
+  results = []
 
-  df.loc[df['Sex'] == 't', 'Sex'] = 'F'
-  df.loc[df['Sex'] == 'f', 'Sex'] = 'M'
+  for row in cursor:
+        results.append(row)
+  cursor.close()
 
-  return render_template('coach.html', table=df.to_html(), isDBA=isDBA)
+  print results
+
+  context = dict(data = results)
+  print context
+
+  return render_template('coach.html', isDBA=isDBA, **context)
 
 @app.route('/search_coach', methods=['GET', 'POST'])
 def search_coach():
@@ -157,15 +146,24 @@ def search_coach():
     lname = request.form['coach_lname']
 
     sel_st = """
-    SELECT coach_id AS "Coach ID", fname AS "First Name", lname AS "Last Name", sex AS "Sex", dob AS "Date of Birth", c_wins AS "Career Wins", c_losses AS "Career Losses" 
-    FROM coach C 
+    SELECT coach_id AS "Coach ID", fname AS "First Name", lname AS "Last Name", sex AS "Sex", dob AS "Date of Birth", c_wins AS "Career Wins", c_losses AS "Career Losses"
+    FROM coach C
     WHERE fname = '{}' AND lname = '{}'
     """.format(fname, lname)
 
-    df = pd.read_sql_query(sql=sel_st, con=engine)
+  cursor = g.conn.execute(sel_st)
+  results = []
+  cursor = g.conn.execute(sel_st)
 
-    return render_template('search.html', table=df.to_html(), isDBA=isDBA)
+  for row in cursor:
+        results.append(row)
+  cursor.close()
 
+  print results
+
+  context = dict(data = results)
+
+  return render_template('search.html', isDBA=isDBA, **context)
 
 @app.route('/court', methods=['GET', 'POST'])
 def court():
@@ -179,14 +177,23 @@ def court():
     print s
     g.conn.execute(s)
 
-  sel_st = "SELECT (court_id, city, state, zipcode) FROM court"
+
+  sel_st = "SELECT court_id, city, state, zipcode FROM court"
   col_titles = ['Court ID', 'City', 'State', 'Zipcode']
 
   cursor = g.conn.execute(sel_st)
-  df = process_cursor(cursor, col_titles)
+  results = []
+  cursor = g.conn.execute(sel_st)
 
-  print isDBA
-  return render_template('court.html', table=df.to_html(), isDBA=isDBA)
+  for row in cursor:
+      results.append(row)
+  cursor.close()
+
+  print results
+
+  context = dict(data = results)
+
+  return render_template('court.html', isDBA=isDBA, **context)
 
 
 @app.route('/dba', methods=['GET', 'POST'])
@@ -210,19 +217,20 @@ def dba():
     # else:
     #   invalidEntry = True
 
-  sel_st = "SELECT (dba_id, email, fname, lname, dob, sex) FROM dba"
-  col_titles = ['DBA ID', 'Email', 'First Name', 'Last Name', 'Date of Birth', 'Sex']
+  sel_st = "SELECT dba_id, email, fname, lname, dob, sex FROM dba"
 
+  results = []
   cursor = g.conn.execute(sel_st)
-  df = process_cursor(cursor, col_titles)
 
-  df.loc[df['Sex'] == 't', 'Sex'] = 'F'
-  df.loc[df['Sex'] == 'f', 'Sex'] = 'M'
+  for row in cursor:
+      results.append(row)
+  cursor.close()
 
-  print isDBA
-  return render_template('dba.html', table=df.to_html(), isDBA=isDBA)
-  # return render_template('dba.html', table=df.to_html(), isDBA=isDBA, invalidEntry=invalidEntry)
+  print results
 
+  context = dict(data = results)
+
+  return render_template('dba.html', isDBA=isDBA, **context)
 
 @app.route('/game', methods=['GET', 'POST'])
 def game():
@@ -243,7 +251,6 @@ def game():
   sel_st_dba = """
   SELECT game_id as "Game ID", start_date as "Start Date", home_id as "Home Team ID", away_id as "Away Team ID", home_score "Home Team Score", away_score as "Away Team Score", ref_id as "Referee ID", is_winner_home as "Is Winner Home?" FROM game
   """
-  df_dba = pd.read_sql_query(sql=sel_st_dba, con=engine)
 
   sel_st_user = '''
   SELECT G.start_date AS "Start Date", TH.name AS "Home Team", G.home_score AS "Home Score", TA.name "Away Team", G.away_score AS "Away Score", R.lname AS "Referee Name", G.is_winner_home AS "Did Home Team Win?"
@@ -251,11 +258,28 @@ def game():
   WHERE G.home_id = TH.team_id AND G.away_id = TA.team_id AND G.ref_id = R.ref_id
   ORDER BY G.start_date
   '''
-  df_user = pd.read_sql_query(sel_st_user, con=engine)
 
-  print isDBA   
-  return render_template('game.html', table_dba=df_dba.to_html(), table_user=df_user.to_html(), isDBA=isDBA)
+  cursor = g.conn.execute(sel_st_dba)
+  results = []
+  cursor = g.conn.execute(sel_st_dba)
 
+  for row in cursor:
+        results.append(row)
+  cursor.close()
+
+  print results
+
+  cursor2 = g.conn.execute(sel_st_user)
+  results2 = []
+  cursor2 = g.conn.execute(sel_st_user)
+
+  for row in cursor2:
+        results2.append(row)
+  cursor2.close()
+
+  context = dict(data1=results, data2=results2)
+
+  return render_template('game.html', isDBA=isDBA, **context)
 
 @app.route('/player', methods=['GET', 'POST'])
 def player():
@@ -281,18 +305,36 @@ def player():
   sel_st_dba = """
   SELECT player_id AS "Player ID", fname AS "First Name", lname AS "Last Name", dob AS "Date of Birth", height AS "Height", weight AS "Weight", is_rhd "Is Right-Handed?", is_injured AS "Is Injured?", hometown AS "Hometown", college AS "College", jersey_number AS "Jersey Number", team_id AS "Team ID", is_signed AS "Is Signed?" FROM player
   """
-  df_dba = pd.read_sql_query(sql=sel_st_dba, con=engine)
+  #df_dba = pd.read_sql_query(sql=sel_st_dba, con=engine)
 
   sel_st_user = """
-  SELECT P.fname AS "First Name", P.lname AS "Last Name", P.dob AS "Date of Birth", P.height AS "Height", P.weight AS "Weight", P.is_rhd "Is Right-Handed?", P.is_injured AS "Is Injured?", P.hometown AS "Hometown", P.college AS "College", jersey_number AS "Jersey Number", T.name AS "Team", P.is_signed AS "Is Signed?" 
+  SELECT P.fname AS "First Name", P.lname AS "Last Name", P.dob AS "Date of Birth", P.height AS "Height", P.weight AS "Weight", P.is_rhd "Is Right-Handed?", P.is_injured AS "Is Injured?", P.hometown AS "Hometown", P.college AS "College", jersey_number AS "Jersey Number", T.name AS "Team", P.is_signed AS "Is Signed?"
   FROM player P
   INNER JOIN Team T ON (P.team_id = T.team_id)
   """
 
-  df_user = pd.read_sql_query(sql=sel_st_user, con=engine)
-
   print isDBA
-  return render_template('player.html', table_dba=df_dba.to_html(), table_user=df_user.to_html(), isDBA=isDBA)
+
+  cursor = g.conn.execute(sel_st_dba)
+  results = []
+  cursor = g.conn.execute(sel_st_dba)
+
+  for row in cursor:
+        results.append(row)
+  cursor.close()
+
+  cursor2 = g.conn.execute(sel_st_user)
+  results2 = []
+  cursor2 = g.conn.execute(sel_st_user)
+
+  for row in cursor2:
+        results2.append(row)
+  cursor2.close()
+
+  context = dict(data1= results, data2=results2)
+  print context
+
+  return render_template('player.html', isDBA=isDBA, **context)
 
 @app.route('/search_player', methods=['GET','POST'])
 def search_player():
@@ -302,16 +344,23 @@ def search_player():
     lname = request.form['player_lname']
 
     sel_st = """
-    SELECT player_id AS "Player ID", fname AS "First Name", lname AS "Last Name", dob AS "Date of Birth", height AS "Height", weight AS "Weight", is_rhd "Is Right-Handed?", is_injured AS "Is Injured?", hometown AS "Hometown", college AS "College", jersey_number AS "Jersey Number", team_id AS "Team ID", is_signed AS "Is Signed?" 
+    SELECT player_id AS "Player ID", fname AS "First Name", lname AS "Last Name", dob AS "Date of Birth", height AS "Height", weight AS "Weight", is_rhd "Is Right-Handed?", is_injured AS "Is Injured?", hometown AS "Hometown", college AS "College", jersey_number AS "Jersey Number", team_id AS "Team ID", is_signed AS "Is Signed?"
     FROM player
     WHERE fname = '{}' AND lname = '{}'
     """.format(fname, lname)
 
-    df = pd.read_sql_query(sql=sel_st, con=engine)
+  results = []
+  cursor = g.conn.execute(sel_st)
 
-    return render_template('search.html', table=df.to_html(), isDBA=isDBA)
+  for row in cursor:
+        results.append(row)
+  cursor.close()
 
+  print results
 
+  context = dict(data = results)
+
+  return render_template('search.html', isDBA=isDBA, **context)
 
 @app.route('/plays_in', methods=['GET', 'POST'])
 def plays_in():
@@ -327,7 +376,7 @@ def plays_in():
     stl = request.form['stl']
     blk = request.form['blk']
     tov = request.form['tov']
-    pf = request.form['pf']    
+    pf = request.form['pf']
 
     s = "INSERT INTO court (player_id, game_id, fg, fga, tp, tpa, pts, ast, stl, blk, tov, pf) VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}')".format(player_id, game_id, fg, fga, tp, tpa, pts, ast, stl, blk, tov, pf)
     print s
@@ -338,8 +387,6 @@ def plays_in():
   FROM Plays_In PI
   """
 
-  df_dba = pd.read_sql_query(sql=sel_st_dba, con=engine)
-
   sel_st_user = """
   SELECT G.start_date as "Date", T.name as "Team", P.fname as "First Name", P.lname as "Last Name", PI.fg as "FG", PI.fga as "FGA", PI.tp as "TP", PI.tpa as "TPA", PI.pts as "PTS", PI.ast as "AST", PI.stl as "STL", PI.blk as "BLK", PI.tov as "TOV", PI.pf as "PF"
   FROM Plays_In PI
@@ -349,11 +396,28 @@ def plays_in():
   ORDER BY "Date"
   """
 
-  df_user = pd.read_sql_query(sql=sel_st_user, con=engine)
-
   print isDBA
-  return render_template('plays_in.html', table_dba=df_dba.to_html(), table_user=df_user.to_html(), isDBA=isDBA)
 
+  results = []
+  cursor = g.conn.execute(sel_st_dba)
+
+  for row in cursor:
+      results.append(row)
+  cursor.close()
+
+  print results
+
+  cursor2 = g.conn.execute(sel_st_user)
+  results2 = []
+  cursor2 = g.conn.execute(sel_st_user)
+
+  for row in cursor2:
+        results2.append(row)
+  cursor2.close()
+
+  context = dict(data1= results, data2=results2)
+
+  return render_template('plays_in.html', isDBA=isDBA, **context)
 
 @app.route('/referee', methods=['GET', 'POST'])
 def referee():
@@ -368,15 +432,23 @@ def referee():
     print s
     g.conn.execute(s)
 
-  sel_st = "SELECT (ref_id, fname, lname, dob, games_refereed) FROM referee"
+  sel_st = "SELECT ref_id, fname, lname, dob, games_refereed FROM referee"
   col_titles = ['Referee ID', 'First Name', 'Last Name', 'Date of Birth', 'Games Refereed']
 
-  cursor = g.conn.execute(sel_st)
-  df = process_cursor(cursor, col_titles)
-
   print isDBA
-  return render_template('referee.html', table=df.to_html())
 
+  results = []
+  cursor = g.conn.execute(sel_st)
+
+  for row in cursor:
+        results.append(row)
+  cursor.close()
+
+  print results
+
+  context = dict(data = results)
+
+  return render_template('referee.html', isDBA=isDBA, **context)
 
 @app.route('/team', methods=['GET', 'POST'])
 def team():
@@ -392,15 +464,21 @@ def team():
     print s
     g.conn.execute(s)
 
-  sel_st = "SELECT (team_id, name, city, coach_id, court_id, wins, losses) FROM team"
+  sel_st = "SELECT team_id, name, city, coach_id, court_id, wins, losses FROM team"
   col_titles = ['Team ID', 'Team Name', 'City', 'Coach ID', 'Court ID', 'Wins', 'Losses']
 
+  results = []
   cursor = g.conn.execute(sel_st)
-  df = process_cursor(cursor, col_titles)
 
-  print isDBA
-  return render_template('team.html', table=df.to_html())
+  for row in cursor:
+        results.append(row)
+  cursor.close()
 
+  print results
+
+  context = dict(data = results)
+
+  return render_template('team.html', isDBA=isDBA, **context)
 
 ## Special Queries: ##
 
@@ -417,9 +495,19 @@ def top_scoring_players():
   LIMIT 5
   """
 
-  df = pd.read_sql_query(sql=sel_st, con=engine)
+  cursor = g.conn.execute(sel_st)
+  results = []
+  cursor = g.conn.execute(sel_st)
 
-  return render_template('top-scoring-players.html', table=df.to_html(), isDBA=isDBA)
+  for row in cursor:
+        results.append(row)
+  cursor.close()
+
+  print results
+
+  context = dict(data = results)
+
+  return render_template('temp.html', isDBA=isDBA, **context)
 
 @app.route('/three-point-kings', methods=['GET', 'POST'])
 def three_point_kings():
@@ -431,26 +519,101 @@ def three_point_kings():
   INNER JOIN Plays_In PI ON (P.player_id = PI.player_id)
   INNER JOIN Game G ON (G.game_id = PI.game_id)
   ORDER BY PI.pts DESC
-  WHERE 
+  WHERE
   LIMIT 5
   """
 
-  df = pd.read_sql_query(sql=sel_st, con=engine)
+  cursor = g.conn.execute(sel_st)
+  results = []
+  cursor = g.conn.execute(sel_st)
 
-  return render_template('top-scoring-players.html', table=df.to_html(), isDBA=isDBA)
+  for row in cursor:
+        results.append(row)
+  cursor.close()
 
-@app.route('/', methods=['GET', 'POST'])
-def s():
+  print results
+
+  context = dict(data = results)
+
+  return render_template('top-scoring-players.html', isDBA=isDBA, **context)
+
+@app.route('/injuries-on-teams', methods=['GET', 'POST'])
+def injuries_on_teams():
   global isDBA
   sel_st = """
+  SELECT COUNT(player.is_injured), team.name
+  FROM team
+  INNER JOIN player ON team.team_id = player.team_id
+  GROUP BY team.name
   """
 
-  df = pd.read_sql_query(sql=sel_st, con=engine)
+  cursor = g.conn.execute(sel_st)
+  results = []
+  cursor = g.conn.execute(sel_st)
 
-  return render_template('.html', table=df.to_html(), isDBA=isDBA)
+  for row in cursor:
+        results.append(row)
+  cursor.close()
 
+  print results
 
+  context = dict(data = results)
 
+  return render_template('injuries-on-teams.html', isDBA=isDBA, **context)
+
+@app.route('/total-stats', methods=['GET', 'POST'])
+def total_stats():
+  global isDBA
+  sel_st = """
+  SELECT T.name as "Team", P.fname as "First Name", P.lname as "Last Name", SUM(PI.fg) as "FG", SUM(PI.fga) as "FGA", SUM(PI.tp) as "TP", SUM(PI.tpa) as "TPA", SUM(PI.pts) as "PTS", SUM(PI.ast) as "AST", SUM(PI.stl) as "STL", SUM(PI.blk) as "BLK", SUM(PI.tov) as "TOV", SUM(PI.pf) as "PF"
+  FROM Plays_In PI
+  INNER JOIN Player P ON (P.player_id = PI.player_id)
+  INNER JOIN Team T ON (P.team_id = T.team_id)
+  INNER JOIN Game G ON (G.game_id = PI.game_id)
+  GROUP BY "Team", "First Name", "Last Name"
+  ORDER BY "Team"
+  """
+
+  cursor = g.conn.execute(sel_st)
+  results = []
+  cursor = g.conn.execute(sel_st)
+
+  for row in cursor:
+        results.append(row)
+  cursor.close()
+
+  print results
+
+  context = dict(data = results)
+
+  return render_template('total-stats.html', isDBA=isDBA, **context)
+
+@app.route('/avg-stats', methods=['GET', 'POST'])
+def avg_stats():
+  global isDBA
+  sel_st = """
+  SELECT T.name as "Team", P.fname as "First Name", P.lname as "Last Name", avg(PI.fg) as "FG", avg(PI.fga) as "FGA", AVG(PI.tp) as "TP", AVG(PI.tpa) as "TPA", AVG(PI.pts) as "PTS", AVG(PI.ast) as "AST", AVG(PI.stl) as "STL", AVG(PI.blk) as "BLK", AVG(PI.tov) as "TOV", AVG(PI.pf) as "PF"
+  FROM Plays_In PI
+  INNER JOIN Player P ON (P.player_id = PI.player_id)
+  INNER JOIN Team T ON (P.team_id = T.team_id)
+  INNER JOIN Game G ON (G.game_id = PI.game_id)
+  GROUP BY "Team", "First Name", "Last Name"
+  ORDER BY "Team"
+  """
+
+  cursor = g.conn.execute(sel_st)
+  results = []
+  cursor = g.conn.execute(sel_st)
+
+  for row in cursor:
+        results.append(row)
+  cursor.close()
+
+  print results
+
+  context = dict(data = results)
+
+  return render_template('total-stats.html', isDBA=isDBA, **context)
 if __name__ == "__main__":
   import click
 
@@ -478,13 +641,3 @@ if __name__ == "__main__":
 
 
   run()
-
-# sel_st = """
-# SELECT G.start_date AS "Game Date", T.name as "Team Name", P.fname as "First Name", P.lname AS "Last Name", PI.pts as "PTS",PI.fg as "FG", PI.fga as "FGA", PI.tp as "TP", PI.tpa as "TPA", PI.ast as "AST", PI.stl as "STL", PI.blk as "BLK", PI.tov as "TOV", PI.pf as "PF"
-# FROM Player P
-# INNER JOIN Team T ON (P.team_id = T.team_id)
-# INNER JOIN Plays_In PI ON (P.player_id = PI.player_id)
-# INNER JOIN Game G ON (G.game_id = PI.game_id)
-# ORDER BY PI.pts DESC
-# """
-

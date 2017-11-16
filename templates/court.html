@@ -22,7 +22,7 @@
   <body>
   <div class=container>
   <h1><strong>NBA Database Project</strong></h1>
-    
+
   <h1>Courts</h1>
 
 
@@ -52,9 +52,9 @@
     {% endif %}
 
     <br>
-    <div>
-      {{ table|safe }}
-    </div>
+    {% for n in data%}
+    <div>{{n}}</div>
+    {% endfor %}
       </div>
   </body>
 

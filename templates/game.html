@@ -22,7 +22,7 @@
   <body>
   <div class=container>
   <h1><strong>NBA Database Project</strong></h1>
-    
+
     <h1>Games</h1>
 
 
@@ -35,7 +35,7 @@
 
     {% if isDBA %}
         <div class="container" style="border:2px solid #4259f4">
-      <h3 style="color:#4259f4"><strong>Add a Coach</strong></h3>
+      <h3 style="color:#4259f4"><strong>Add a Game</strong></h3>
       <h4 style="color:#4259f4"> DBA-access only </h4>
       <br>
     <form method="POST" action="/game">
@@ -56,17 +56,18 @@
     {% if isDBA %}
     <h1 style='color: red'>Raw Game Table (for DBA-use)</h1>
     <br>
-    <div>
-      {{ table_dba|safe }}
-    </div>
+    {% for n in data1 %}
+    <div>{{n}}</div>
+    {% endfor %}
     <p>
     <br>
     {% endif %}
 
     <div>
     <h5> List of Games: </h5>
-      {{ table_user|safe }}
-    </div>
+    {% for n in data2%}
+    <div>{{n}}</div>
+    {% endfor %}
     <p>
 
   </body>

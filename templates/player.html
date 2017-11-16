@@ -69,16 +69,22 @@
     <br>
     <h1 style='color: red'>Raw Game Table (for DBA-use)</h1>
     <div>
-      {{ table_dba|safe }}
+      {% for n in data1 %}
+      <div>{{n}}</div>
+      {% endfor %}
     </div>
       </div>
+
+      <br>
+      <br>
     {% endif %}
 
-    <br>
-    <br>
-        <div>
-      {{ table_user|safe }}
-    </div>
+
+
+    <h1 style='color:blue'>List of games:</h1>
+    {% for n in data2%}
+    <div>{{n}}</div>
+    {% endfor %}
       </div>
   </body>
 

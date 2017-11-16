@@ -21,7 +21,7 @@
   <body>
   <div class=container>
   <h1><strong>NBA Database Project</strong></h1>
-    
+
     <h1>Coaches</h1>
 
 
@@ -63,9 +63,9 @@
     </div>
     <br>
     <br>
-    <div class=container>
-      {{ table|safe }}
-    </div>
+    {% for n in data1 %}
+    <div>{{n}}</div>
+    {% endfor %}
 
     </div>
   </body>

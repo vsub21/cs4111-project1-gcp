@@ -52,20 +52,24 @@
           pf: <input type="number" name="pf"> <br>
 
         <input type="submit" value="Add"></p>
-        
+
     </form>
     {% endif %}
     {% if isDBA %}
     <br>
     <h1 style='color: red'>Raw Plays_In Table (for DBA-use)</h1>
     <div>
-      {{ table_dba|safe }}
+      {% for n in data1 %}
+      <div>{{n}}</div>
+      {% endfor %}
     </div>
       </div>
     {% endif %}
     <br>
     <div>
-      {{ table_user|safe }}
+      {% for n in data2 %}
+      <div>{{n}}</div>
+      {% endfor %}
     </div>
 </div>
   </body>
