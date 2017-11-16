@@ -22,7 +22,7 @@
   <body>
   <div class=container>
   <h1><strong>NBA Database Project</strong></h1>
-    
+
     <h1>Search Results</h1>
 
     {% if isDBA %}
@@ -33,7 +33,9 @@
     {% endif %}
 
     <div class=container>
-      {{ table|safe }}
+    {% for n in data %}
+    <div>{{n}}</div>
+    {% endfor %}
     </div>
 
     </div>
