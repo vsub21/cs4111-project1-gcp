@@ -10,7 +10,7 @@ The PostgreSQL account where your database on our server resides. (This should b
 vs2575
 
 The URL of your web application.
-35.196.221.152:8111
+http://35.196.212.23:8111/
 
 A description of the parts of your original proposal in Part 1 that you implemented, the parts you did not (which hopefully is nothing or something very small), and possibly new features that were not included in the proposal and that you implemented anyway. If you did not implement some part of the proposal in Part 1, explain why.
 

@@ -204,15 +204,8 @@ def dba():
     dob = request.form['dob']
     sex = request.form['sex']
 
-    # hasValidEmail = re.match("[^@]+@[^@]+\.[^@]+", email)
-    # hasEmptyString = (len(dba_id) is 0) or (len(email) is 0) or (len(fname) is 0) or (len(lname) is 0) or (len(dob) is 0) or (len(sex) is 0)
-
-    # if (hasValidEmail and not hasEmptyString):
-    #   s = "INSERT INTO dba (dba_id, email, fname, lname, dob, sex) VALUES ('{}', '{}', '{}', '{}', '{}', '{}')".format(dba_id, email, fname, lname, dob, sex)
-    #   print s
-    #   g.conn.execute(s)
-    # else:
-    #   invalidEntry = True
+    s = "INSERT INTO dba (dba_id, email, fname, lname, dob, sex) VALUES ('{}', '{}', '{}', '{}', '{}', '{}')".format(dba_id, email, fname, lname, dob, sex)
+    g.conn.execute(s)
 
   sel_st = "SELECT dba_id, email, fname, lname, dob, sex FROM dba"
 
