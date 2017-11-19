@@ -497,35 +497,35 @@ def top_scoring_players():
 
   context = dict(data = results)
 
-  return render_template('temp.html', isDBA=isDBA, **context)
-
-@app.route('/three-point-kings', methods=['GET', 'POST'])
-def three_point_kings():
-  global isDBA
-  sel_st = """
-  SELECT G.start_date AS "Game Date", T.name as "Team Name", P.fname as "First Name", P.lname AS "Last Name", PI.pts as "PTS",PI.fg as "FG", PI.fga as "FGA", PI.tp as "TP", PI.tpa as "TPA", PI.ast as "AST", PI.stl as "STL", PI.blk as "BLK", PI.tov as "TOV", PI.pf as "PF"
-  FROM Player P
-  INNER JOIN Team T ON (P.team_id = T.team_id)
-  INNER JOIN Plays_In PI ON (P.player_id = PI.player_id)
-  INNER JOIN Game G ON (G.game_id = PI.game_id)
-  ORDER BY PI.pts DESC
-  WHERE
-  LIMIT 5
-  """
-
-  cursor = g.conn.execute(sel_st)
-  results = []
-  cursor = g.conn.execute(sel_st)
-
-  for row in cursor:
-        results.append(row)
-  cursor.close()
-
-  print results
-
-  context = dict(data = results)
-
   return render_template('top-scoring-players.html', isDBA=isDBA, **context)
+
+# @app.route('/three-point-kings', methods=['GET', 'POST'])
+# def three_point_kings():
+#   global isDBA
+#   sel_st = """
+#   SELECT G.start_date AS "Game Date", T.name as "Team Name", P.fname as "First Name", P.lname AS "Last Name", PI.pts as "PTS",PI.fg as "FG", PI.fga as "FGA", PI.tp as "TP", PI.tpa as "TPA", PI.ast as "AST", PI.stl as "STL", PI.blk as "BLK", PI.tov as "TOV", PI.pf as "PF"
+#   FROM Player P
+#   INNER JOIN Team T ON (P.team_id = T.team_id)
+#   INNER JOIN Plays_In PI ON (P.player_id = PI.player_id)
+#   INNER JOIN Game G ON (G.game_id = PI.game_id)
+#   ORDER BY PI.pts DESC
+#   WHERE
+#   LIMIT 5
+#   """
+#
+#   cursor = g.conn.execute(sel_st)
+#   results = []
+#   cursor = g.conn.execute(sel_st)
+#
+#   for row in cursor:
+#         results.append(row)
+#   cursor.close()
+#
+#   print results
+#
+#   context = dict(data = results)
+#
+#   return render_template('top-scoring-players.html', isDBA=isDBA, **context)
 
 @app.route('/injuries-on-teams', methods=['GET', 'POST'])
 def injuries_on_teams():
